@@ -149,6 +149,7 @@ export const AmountScreen = ({
       senderAddress: walletAddress,
       recipientAddress: formData.address?.trim(),
       dogeAmount: formData.dogeAmount,
+      selectedAddressIndex,
     };
     const error = validateTransaction({
       ...txData,
@@ -160,36 +161,46 @@ export const AmountScreen = ({
     } else {
       sendMessage(
         {
-          message: MESSAGE_TYPES.CREATE_TRANSACTION,
+          message: MESSAGE_TYPES.GET_ADDRESS_UTXO,
           data: txData,
         },
-        ({ rawTx, fee, amount }) => {
-          if (rawTx && fee !== undefined && amount) {
-            setFormData({
-              ...formData,
-              rawTx,
-              fee,
-              dogeAmount: amount,
-            });
-            setFormPage('confirmation');
-            setLoading(false);
-          } else {
-            setLoading(false);
-            Toast.show({
-              title: 'Error',
-              description: 'Error creating transaction',
-              duration: 3000,
-              render: () => {
-                return (
-                  <ToastRender
-                    title='Error'
-                    description='Error creating transaction'
-                    status='error'
-                  />
-                );
-              },
-            });
-          }
+        ({ utxos, pubkey }) => {
+          // const availableUtxos = utxos.map((v) => ({
+          //   txId: v.txid,
+          //   outputIndex: v.vout,
+          //   satoshis: v.value,
+          //   scriptPk: pubkey,
+          //   addressType: 0,
+          //   address: walletAddress,
+          //   pubkey,
+          //   ords: [],
+          // }));
+          // if (rawTx && fee !== undefined && amount) {
+          //   setFormData({
+          //     ...formData,
+          //     rawTx,
+          //     fee,
+          //     dogeAmount: amount,
+          //   });
+          //   setFormPage('confirmation');
+          //   setLoading(false);
+          // } else {
+          //   setLoading(false);
+          //   Toast.show({
+          //     title: 'Error',
+          //     description: 'Error creating transaction',
+          //     duration: 3000,
+          //     render: () => {
+          //       return (
+          //         <ToastRender
+          //           title='Error'
+          //           description='Error creating transaction'
+          //           status='error'
+          //         />
+          //       );
+          //     },
+          //   });
+          // }
         }
       );
     }

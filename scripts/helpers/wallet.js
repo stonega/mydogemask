@@ -19,17 +19,31 @@ import { getLocalValue, setLocalValue } from './storage';
 const ec = new EC('secp256k1');
 
 // Dogecoin mainnet
+// export const network = {
+//   messagePrefix: '\x19Dogecoin Signed Message:\n',
+//   bech32: 'dc',
+//   bip44: 3,
+//   bip32: {
+//     public: 0x02facafd,
+//     private: 0x02fac398,
+//   },
+//   pubKeyHash: 0x1e,
+//   scriptHash: 0x16,
+//   wif: 0x9e,
+// };
+
+// Dogecoin testnet3
 export const network = {
   messagePrefix: '\x19Dogecoin Signed Message:\n',
-  bech32: 'dc',
+  bech32: 'nb',
   bip44: 3,
   bip32: {
     public: 0x02facafd,
-    private: 0x02fac398,
+    private: 0x04358394,
   },
-  pubKeyHash: 0x1e,
-  scriptHash: 0x16,
-  wif: 0x9e,
+  pubKeyHash: 0x71,
+  scriptHash: 0xc4,
+  wif: 0xf1,
 };
 
 export function generatePhrase() {
@@ -70,7 +84,7 @@ export function decodeRawTx(rawTx) {
 }
 
 export function validateAddress(data) {
-  return Validator.validate(data, 'doge', 'prod');
+  return Validator.validate(data, 'doge', 'testnet');
 }
 
 export const validateTransaction = ({

@@ -20,13 +20,14 @@ export function Balance({ walletAddress }) {
 
   const usdValue = balance ? sb.toBitcoin(balance) * usdPrice : 0;
   const getAddressBalance = useCallback(() => {
+    console.log(`${window.location.origin}/secp256k1.wasm`);
     sendMessage(
       {
         message: MESSAGE_TYPES.GET_ADDRESS_BALANCE,
         data: { address: walletAddress },
       },
       (walletBalance) => {
-        if (walletBalance) {
+        if (walletBalance != null) {
           setBalance(Number(walletBalance));
         } else {
           logError(new Error('Failed to get wallet balance'));

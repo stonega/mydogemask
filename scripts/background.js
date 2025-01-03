@@ -1,7 +1,7 @@
 import sb from 'satoshi-bitcoin';
 
 import { logError } from '../utils/error';
-import { mydoge } from './api';
+import { dogeMempool, mydoge } from './api';
 import { decrypt, encrypt, hash } from './helpers/cipher';
 import {
   AUTHENTICATED,
@@ -99,17 +99,17 @@ async function createClientPopup({
 
 const createClientRequestHandler =
   () =>
-  async ({ data, sendResponse, sender, messageType }) => {
-    const isConnected = (await getSessionValue(CONNECTED_CLIENTS))?.[
-      sender.origin
-    ];
-    if (!isConnected) {
-      sendResponse?.(false);
-      return;
-    }
-    await createClientPopup({ sendResponse, sender, data, messageType });
-    return true;
-  };
+    async ({ data, sendResponse, sender, messageType }) => {
+      const isConnected = (await getSessionValue(CONNECTED_CLIENTS))?.[
+        sender.origin
+      ];
+      if (!isConnected) {
+        sendResponse?.(false);
+        return;
+      }
+      await createClientPopup({ sendResponse, sender, data, messageType });
+      return true;
+    };
 
 // Build a raw transaction and determine fee
 async function onCreateTransaction({ data = {}, sendResponse } = {}) {
@@ -117,11 +117,15 @@ async function onCreateTransaction({ data = {}, sendResponse } = {}) {
   const amount = sb.toBitcoin(amountSatoshi);
 
   try {
-    const response = await mydoge.post('/v3/tx/prepare', {
-      sender: data.senderAddress,
-      recipient: data.recipientAddress,
-      amount,
-    });
+    const response = await dogeMempool.get(
+      `/address/${data.senderAddress}/utxo`
+    );
+    const utxo = response.data;
+    // const response = await mydoge.post('/v3/tx/prepare', {
+    //   sender: data.senderAddress,
+    //   recipient: data.recipientAddress,
+    //   amount,
+    // });
     const { rawTx, fee, amount: resultAmount } = response.data;
     let amountMismatch = false;
 
@@ -306,7 +310,7 @@ function onSendTransaction({ data = {}, sendResponse } = {}) {
             reasons: ['BLOBS'],
             justification: 'Handle transaction status notifications',
           })
-          .catch(() => {});
+          .catch(() => { });
 
         // Cache spent utxos
         await cacheSignedTx(signed);
@@ -374,7 +378,7 @@ async function onSendInscribeTransfer({ data = {}, sendResponse } = {}) {
         reasons: ['BLOBS'],
         justification: 'Handle transaction status notifications',
       })
-      .catch(() => {});
+      .catch(() => { });
 
     const txsCache = (await getLocalValue(INSCRIPTION_TXS_CACHE)) ?? [];
 
@@ -457,7 +461,7 @@ async function onSendPsbt({ data = {}, sendResponse } = {}) {
         reasons: ['BLOBS'],
         justification: 'Handle transaction status notifications',
       })
-      .catch(() => {});
+      .catch(() => { });
 
     await cacheSignedTx(data.rawTx);
 
@@ -592,17 +596,36 @@ async function onGetAddressBalance({ data, sendResponse } = {}) {
     const addresses = data.addresses?.length ? data.addresses : [data.address];
     const balances = await Promise.all(
       addresses.map(async (address) => {
-        const response = (
-          await mydoge.get('/wallet/info', {
-            params: { route: `/address/${address}` },
-          })
-        ).data;
-
-        return response.balance;
+        const response = await dogeMempool.get(`/address/${address}`);
+        const balance =
+          response.data.chain_stats.funded_txo_sum -
+          response.data.chain_stats.spent_txo_sum;
+        return balance;
       })
     );
+    console.log(balances);
 
     sendResponse?.(balances.length > 1 ? balances : balances[0]);
+  } catch (err) {
+    logError(err);
+    sendResponse?.(false);
+  }
+}
+
+async function onGetAddressUtxo({ data, sendResponse } = {}) {
+  try {
+    const { address, selectedAddressIndex } = data;
+    const response = await dogeMempool.get(`/address/${address}/utxo`);
+    const [encryptedWallet, password] = await Promise.all([getLocalValue(WALLET), getSessionValue(PASSWORD)]).
+    const decryptedWallet = decrypt({
+      data: encryptedWallet,
+      password,
+    });
+    const pubkey = fromWIF(
+      decryptedWallet.children[selectedAddressIndex]
+    ).publicKey.toString('hex');
+    console.log(response.data)
+    sendResponse?.({ utxos: response.data, pubkey });
   } catch (err) {
     logError(err);
     sendResponse?.(false);
@@ -619,9 +642,8 @@ async function onGetTransactions({ data, sendResponse } = {}) {
     const response = (
       await mydoge.get('/wallet/info', {
         params: {
-          route: `/address/${data.address}?page=${
-            data.page || 1
-          }&pageSize=${TRANSACTION_PAGE_SIZE}`,
+          route: `/ address / ${data.address} ? page = ${data.page || 1
+            } & pageSize=${TRANSACTION_PAGE_SIZE}`,
         },
       })
     ).data;
@@ -649,7 +671,9 @@ async function onGetTransactions({ data, sendResponse } = {}) {
 async function onGetTransactionDetails({ data, sendResponse } = {}) {
   try {
     const transaction = (
-      await mydoge.get('wallet/info', { params: { route: `/tx/${data.txId}` } })
+      await mydoge.get('wallet/info', {
+        params: { route: `/ tx / ${data.txId}` },
+      })
     ).data;
 
     sendResponse?.(transaction);
@@ -1179,18 +1203,17 @@ async function onNotifyTransactionSuccess({ data: { txId } } = {}) {
             chrome.tabs.create({
               url: `https://sochain.com/tx/DOGE/${notificationId}`,
             });
-            await chrome.notifications.clear(notificationId).catch(() => {});
+            await chrome.notifications.clear(notificationId).catch(() => { });
           });
           chrome.notifications.create(txId, {
             type: 'basic',
             title: 'Transaction Confirmed',
             iconUrl: '../assets/mydoge128.png',
-            message: `${sb.toBitcoin(transaction.vout[0].value)} DOGE sent to ${
-              transaction.vout[0].addresses[0]
-            }.`,
+            message: `${sb.toBitcoin(transaction.vout[0].value)} DOGE sent to ${transaction.vout[0].addresses[0]
+              }.`,
           });
 
-          chrome.offscreen?.closeDocument().catch(() => {});
+          chrome.offscreen?.closeDocument().catch(() => { });
         } else if (!transaction) {
           chrome.notifications.create({
             type: 'basic',
@@ -1273,6 +1296,9 @@ export const messageHandler = ({ message, data }, sender, sendResponse) => {
       break;
     case MESSAGE_TYPES.GET_TRANSACTIONS:
       onGetTransactions({ data, sendResponse, sender });
+      break;
+    case MESSAGE_TYPES.GET_ADDRESS_UTXO:
+      onGetAddressUtxo({ data, sendResponse, sender });
       break;
     case MESSAGE_TYPES.CLIENT_REQUEST_CONNECTION:
       onConnectionRequest({ sender, sendResponse, data });

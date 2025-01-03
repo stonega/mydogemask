@@ -140,6 +140,7 @@ export const MESSAGE_TYPES = {
   DELETE_ADDRESS: 'deleteAddress',
   GET_DOGECOIN_PRICE: 'getDogecoinPrice',
   GET_ADDRESS_BALANCE: 'getAddressBalance',
+  GET_ADDRESS_UTXO: 'getAddressUtxo',
   GET_TRANSACTIONS: 'getTransactions',
   GET_TRANSACTION_DETAILS: 'getTransactionDetails',
   CREATE_TRANSACTION: 'createTransaction',
@@ -159,6 +160,7 @@ export const MESSAGE_TYPES = {
 };
 
 export const MYDOGE_BASE_URL = 'https://api.mydoge.com'; // 'http://localhost:3000'; //
+export const MEMPOOL_BASE_URL = 'https://test-doge-electrs.bool.network';
 
 export const DOGGY_ICON_URL = 'https://doggy.market/drc-20';
 export const DOGGY_API_ICON_URL_2 = 'https://api.doggy.market/static/drc-20';
