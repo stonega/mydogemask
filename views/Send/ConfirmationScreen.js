@@ -1,7 +1,7 @@
 import {
   amountToSatoshis,
   createSendMultiBTC,
-} from '@safematrix/ord-utils/lib';
+} from '@safematrix/dogecoin-utils/lib';
 import { Avatar, Button, Center, HStack, Text, Toast } from 'native-base';
 import { useCallback, useEffect, useState } from 'react';
 
