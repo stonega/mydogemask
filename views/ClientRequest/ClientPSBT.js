@@ -169,7 +169,7 @@ export function ClientPSBT({
           rawTx,
           indexes,
           selectedAddressIndex,
-          partial,
+          partial: false,
           sighashType,
         },
       },

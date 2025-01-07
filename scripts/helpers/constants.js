@@ -151,6 +151,7 @@ export const MESSAGE_TYPES = {
   SEND_TRANSFER_TRANSACTION: 'sendInscribeTransferTransaction',
   SIGN_PSBT: 'signPsbt',
   SEND_PSBT: 'sendPsbt',
+  BROADCAST_TX: 'broadcastTx',
   SIGN_MESSAGE: 'signMessage',
   DECRYPT_MESSAGE: 'decryptMessage',
   GET_PSBT_FEE: 'getPsbtFee',

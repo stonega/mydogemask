@@ -94,7 +94,20 @@ export const Header = ({
           pt='8px'
           onPress={() => navigate(cancelRoute ?? -1)}
         />
-      ) : null}
+      ) : (
+        <Text
+          fontWeight='medium'
+          fontSize='md'
+          pb='12px'
+          px='12px'
+          color='#ff2c2c'
+          mt='10px'
+          maxW='180px'
+          noOfLines={1}
+        >
+          TESTNET
+        </Text>
+      )}
       <Text
         fontWeight='medium'
         fontSize='md'
@@ -200,15 +213,15 @@ export const Header = ({
             />
             Create address
           </MenuItem>
-          {/* <MenuItem
-            onPress={() => setOpenModal('DELETE_ADDRESS')}
-            isDisabled={
-              wallet.addresses.length === 1 || selectedAddressIndex === 0
-            }
-          >
-            <FiTrash2 size='20px' alt='Delete address' />
-            Delete address
-          </MenuItem> */}
+          {/* <MenuItem */}
+          {/*   onPress={() => setOpenModal('DELETE_ADDRESS')} */}
+          {/*   isDisabled={ */}
+          {/*     wallet.addresses.length === 1 || selectedAddressIndex === 0 */}
+          {/*   } */}
+          {/* > */}
+          {/*   <FiTrash2 size='20px' alt='Delete address' /> */}
+          {/*   Delete address */}
+          {/* </MenuItem> */}
           <Divider my='6px' w='100%' />
           <MenuItem onPress={() => setOpenModal('BACKUP_SECURITY')}>
             <FiSettings size='20px' alt='Backup & security' />

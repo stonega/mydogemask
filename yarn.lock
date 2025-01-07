@@ -1666,9 +1666,9 @@
     eslint-scope "5.1.1"
 
 "@noble/hashes@^1.2.0":
-  version "1.6.1"
-  resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.6.1.tgz#df6e5943edcea504bac61395926d6fd67869a0d5"
-  integrity sha512-pq5D8h10hHBjyqX+cfBm0i8JUXJ0UhczFc4r74zbuT9XgewFo2E3J1cOaGtdZynILNmQ685YWGzGE1Zv6io50w==
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.7.0.tgz#5d9e33af2c7d04fee35de1519b80c958b2e35e39"
+  integrity sha512-HXydb0DgzTpDPwbVeDGCG1gIu7X6+AuU6Zl6av/E/KG8LMsvPntvq+w17CHRpKBmN6Ybdrt1eP3k4cj8DJa78w==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -2594,15 +2594,14 @@
   resolved "https://registry.yarnpkg.com/@rushstack/eslint-patch/-/eslint-patch-1.10.4.tgz#427d5549943a9c6fce808e39ea64dbe60d4047f1"
   integrity sha512-WJgX9nzTqknM393q1QJDJmoW28kUfEnybeTfVNcNAPnIx210RXm2DiXiHzfNPJNIUUb1tJnz/l4QGtJ30PgWmA==
 
-"@safematrix/ord-utils@^0.5.0-beta.6":
-  version "0.5.0-beta.6"
-  resolved "https://registry.yarnpkg.com/@safematrix/ord-utils/-/ord-utils-0.5.0-beta.6.tgz#cfacdfc3d4011b0989ac726d94bb3c9ceafa0d71"
-  integrity sha512-l2lSGLZsFC5zgLo+C+HXfBYYl70ZYF2wBg374ipL1DPHRYqXfbkqU6ZwbNTQC6AMa/oW7hwnoUTu1Zlg2Js4vg==
+"@safematrix/ord-utils@file:../ord-utils":
+  version "0.5.3"
   dependencies:
     bignumber.js "^9.1.1"
     bip32 "^4.0.0"
     bitcoinjs-lib "^6.1.6"
     bs58check "^2.1.2"
+    ord-utils-tiny-secp256k1 "^1.0.1"
     randombytes "^2.1.0"
     uint8array-tools "^0.0.7"
     varuint-bitcoin "^1.1.2"
@@ -9864,6 +9863,13 @@ ora@^3.4.0:
     strip-ansi "^5.2.0"
     wcwidth "^1.0.1"
 
+ord-utils-tiny-secp256k1@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/ord-utils-tiny-secp256k1/-/ord-utils-tiny-secp256k1-1.0.1.tgz#cc511792872b2c7d7d466df4e342e89f7a9675a5"
+  integrity sha512-cmp4A6TfTjTKH5tauYJOq6YD1syWbDImP0eF6ygnHd8x1LY7KaUthZ3GEhD9DPKbK66yD8IP21Ltw+h8ges8AQ==
+  dependencies:
+    uint8array-tools "0.0.7"
+
 os-browserify@0.3.0, os-browserify@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/os-browserify/-/os-browserify-0.3.0.tgz#854373c7f5c2315914fc9bfc6bd8238fdda1ec27"
@@ -12772,7 +12778,7 @@ uglify-es@^3.1.9:
     commander "~2.13.0"
     source-map "~0.6.1"
 
-uint8array-tools@^0.0.7:
+uint8array-tools@0.0.7, uint8array-tools@^0.0.7:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/uint8array-tools/-/uint8array-tools-0.0.7.tgz#a7a2bb5d8836eae2fade68c771454e6a438b390d"
   integrity sha512-vrrNZJiusLWoFWBqz5Y5KMCgP9W9hnjZHzZiZRT8oNAkq3d5Z5Oe76jAvVVSRh4U8GGR90N2X1dWtrhvx6L8UQ==

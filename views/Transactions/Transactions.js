@@ -140,7 +140,7 @@ export function Transactions() {
         <Balance walletAddress={activeAddress} />
         <Center>
           <HStack space='24px' pt='14px' pb='16px'>
-            <ActionButton icon={Buy} label='Buy' onPress={onBuy} />
+            {/* <ActionButton icon={Buy} label='Buy' onPress={onBuy} /> */}
 
             <ActionButton
               icon={Receive}
@@ -155,32 +155,32 @@ export function Transactions() {
             />
           </HStack>
         </Center>
-        <TabView
-          navigationState={{ index: txTabIndex, routes }}
-          renderScene={renderScene}
-          onIndexChange={setTxTabIndex}
-          initialLayout={{ width: 375 }}
-          renderTabBar={(props) => (
-            <TabBar
-              indicatorStyle={{
-                backgroundColor: '#e3ab02',
-              }}
-              style={{ backgroundColor: 'transparent' }}
-              renderLabel={({ route, focused }) => (
-                <Text
-                  fontWeight='bold'
-                  fontSize='14px'
-                  color={focused ? 'black' : '#A1A1AA'}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  {route.title}
-                </Text>
-              )}
-              {...props}
-            />
-          )}
-        />
+        {/* <TabView */}
+        {/*   navigationState={{ index: txTabIndex, routes }} */}
+        {/*   renderScene={renderScene} */}
+        {/*   onIndexChange={setTxTabIndex} */}
+        {/*   initialLayout={{ width: 375 }} */}
+        {/*   renderTabBar={(props) => ( */}
+        {/*     <TabBar */}
+        {/*       indicatorStyle={{ */}
+        {/*         backgroundColor: '#e3ab02', */}
+        {/*       }} */}
+        {/*       style={{ backgroundColor: 'transparent' }} */}
+        {/*       renderLabel={({ route, focused }) => ( */}
+        {/*         <Text */}
+        {/*           fontWeight='bold' */}
+        {/*           fontSize='14px' */}
+        {/*           color={focused ? 'black' : '#A1A1AA'} */}
+        {/*           numberOfLines={1} */}
+        {/*           adjustsFontSizeToFit */}
+        {/*         > */}
+        {/*           {route.title} */}
+        {/*         </Text> */}
+        {/*       )} */}
+        {/*       {...props} */}
+        {/*     /> */}
+        {/*   )} */}
+        {/* /> */}
       </Box>
 
       <WalletDetailModal

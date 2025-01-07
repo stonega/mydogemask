@@ -25,6 +25,8 @@ module.exports = withNativebase({
       config.devtool = 'cheap-module-source-map';
       return config;
     },
+    reactStrictMode: true,
+    transpilePackages: ['@safematrix/ord-utils'],
     images: {
       unoptimized: true,
     },

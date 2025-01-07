@@ -1,3 +1,4 @@
+import * as bitcoin from 'bitcoinjs-lib';
 import {
   Avatar,
   Box,
@@ -22,6 +23,23 @@ import { sanitizeDogeInput } from '../../utils/formatters';
 
 const MAX_CHARACTERS = 10000;
 const REFRESH_INTERVAL = 10000;
+
+function getScriptPkFromPubkey(publicKeyHex) {
+  // Convert the public key from hex string to a buffer
+  const publicKeyBuffer = Buffer.from(publicKeyHex, 'hex');
+
+  // Create a P2PKH address from the public key
+  const { address } = bitcoin.payments.p2pkh({ pubkey: publicKeyBuffer });
+
+  if (!address) {
+    throw new Error('Invalid public key');
+  }
+
+  // Get the scriptPubKey from the address
+  const scriptPubKey = bitcoin.address.toOutputScript(address);
+
+  return scriptPubKey.toString('hex');
+}
 
 export const AmountScreen = ({
   setFormPage,
@@ -162,45 +180,45 @@ export const AmountScreen = ({
       sendMessage(
         {
           message: MESSAGE_TYPES.GET_ADDRESS_UTXO,
-          data: txData,
+          data: { address: walletAddress, selectedAddressIndex },
         },
         ({ utxos, pubkey }) => {
-          // const availableUtxos = utxos.map((v) => ({
-          //   txId: v.txid,
-          //   outputIndex: v.vout,
-          //   satoshis: v.value,
-          //   scriptPk: pubkey,
-          //   addressType: 0,
-          //   address: walletAddress,
-          //   pubkey,
-          //   ords: [],
-          // }));
-          // if (rawTx && fee !== undefined && amount) {
-          //   setFormData({
-          //     ...formData,
-          //     rawTx,
-          //     fee,
-          //     dogeAmount: amount,
-          //   });
-          //   setFormPage('confirmation');
-          //   setLoading(false);
-          // } else {
-          //   setLoading(false);
-          //   Toast.show({
-          //     title: 'Error',
-          //     description: 'Error creating transaction',
-          //     duration: 3000,
-          //     render: () => {
-          //       return (
-          //         <ToastRender
-          //           title='Error'
-          //           description='Error creating transaction'
-          //           status='error'
-          //         />
-          //       );
-          //     },
-          //   });
-          // }
+          const scriptPk = getScriptPkFromPubkey(pubkey);
+          const availableUtxos = utxos?.map((v) => ({
+            txId: v.txid,
+            outputIndex: v.vout,
+            satoshis: v.value,
+            scriptPk,
+            addressType: 0,
+            address: walletAddress,
+            pubkey,
+            ords: [],
+          }));
+          console.log(availableUtxos);
+          if (availableUtxos) {
+            setFormData({
+              ...formData,
+              utxos: availableUtxos,
+            });
+            setFormPage('confirmation');
+            setLoading(false);
+          } else {
+            setLoading(false);
+            Toast.show({
+              title: 'Error',
+              description: 'Error creating transaction',
+              duration: 3000,
+              render: () => {
+                return (
+                  <ToastRender
+                    title='Error'
+                    description='Error creating transaction'
+                    status='error'
+                  />
+                );
+              },
+            });
+          }
         }
       );
     }

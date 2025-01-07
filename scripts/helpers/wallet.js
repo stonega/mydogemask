@@ -140,6 +140,11 @@ export function signRawPsbt(
       rawTx: finalPsbt.toHex(),
     };
   }
+  if (!indexes) {
+    indexes = new Array(finalPsbt.txInputs.length).fill().map((_, i) => i);
+  }
+  console.log(indexes);
+
   // Sign / finalize inputs
   for (let i = 0; i < indexes.length; i++) {
     const index = Number(indexes[i]);

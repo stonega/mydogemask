@@ -1,3 +1,7 @@
+import {
+  amountToSatoshis,
+  createSendMultiBTC,
+} from '@safematrix/ord-utils/lib';
 import { Avatar, Button, Center, HStack, Text, Toast } from 'native-base';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -27,7 +31,7 @@ export const ConfirmationScreen = ({
         message: MESSAGE_TYPES.GET_ADDRESS_BALANCE,
         data: { address: walletAddress },
       },
-      (balance) => {
+      async (balance) => {
         if (balance) {
           addressBalance = balance;
         } else {
@@ -43,14 +47,63 @@ export const ConfirmationScreen = ({
         if (error) {
           setErrors({ confirmation: error });
           setLoading(false);
-
           return;
         }
         // Process transaction
+        const signPsbt = (rawTx) =>
+          new Promise((resolve) =>
+            sendMessage(
+              {
+                message: MESSAGE_TYPES.SIGN_PSBT,
+                data: {
+                  rawTx,
+                  selectedAddressIndex,
+                  feeOnly: false,
+                },
+              },
+              ({ rawTx }) => {
+                console.log({ rawTx });
+                resolve(rawTx);
+              }
+            )
+          );
+        const network = {
+          messagePrefix: '\x19Dogecoin Signed Message:\n',
+          bech32: 'nb',
+          bip44: 3,
+          bip32: {
+            public: 0x02facafd,
+            private: 0x04358394,
+          },
+          pubKeyHash: 0x71,
+          scriptHash: 0xc4,
+          wif: 0xf1,
+        };
+        const params = {
+          /// Filter out utxos that have ords or atomicals
+          utxos: formData.utxos,
+          receivers: [
+            {
+              address: formData.address,
+              amount: amountToSatoshis(formData.dogeAmount),
+            },
+          ],
+          wallet: {
+            mydoge: 'mydoge',
+            signPsbt,
+          },
+          changeAddress: walletAddress,
+          receiverToPayFee: false,
+          feeRate: 1000,
+          dump: false,
+          network,
+        };
+        console.log({ params });
+        const psbt = await createSendMultiBTC(params);
         sendMessage(
           {
-            message: MESSAGE_TYPES.SEND_TRANSACTION,
-            data: { rawTx: formData.rawTx, selectedAddressIndex },
+            message: MESSAGE_TYPES.BROADCAST_TX,
+            data: psbt,
           },
           (txId) => {
             if (txId) {

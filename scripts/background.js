@@ -99,17 +99,17 @@ async function createClientPopup({
 
 const createClientRequestHandler =
   () =>
-    async ({ data, sendResponse, sender, messageType }) => {
-      const isConnected = (await getSessionValue(CONNECTED_CLIENTS))?.[
-        sender.origin
-      ];
-      if (!isConnected) {
-        sendResponse?.(false);
-        return;
-      }
-      await createClientPopup({ sendResponse, sender, data, messageType });
-      return true;
-    };
+  async ({ data, sendResponse, sender, messageType }) => {
+    const isConnected = (await getSessionValue(CONNECTED_CLIENTS))?.[
+      sender.origin
+    ];
+    if (!isConnected) {
+      sendResponse?.(false);
+      return;
+    }
+    await createClientPopup({ sendResponse, sender, data, messageType });
+    return true;
+  };
 
 // Build a raw transaction and determine fee
 async function onCreateTransaction({ data = {}, sendResponse } = {}) {
@@ -310,7 +310,7 @@ function onSendTransaction({ data = {}, sendResponse } = {}) {
             reasons: ['BLOBS'],
             justification: 'Handle transaction status notifications',
           })
-          .catch(() => { });
+          .catch(() => {});
 
         // Cache spent utxos
         await cacheSignedTx(signed);
@@ -378,7 +378,7 @@ async function onSendInscribeTransfer({ data = {}, sendResponse } = {}) {
         reasons: ['BLOBS'],
         justification: 'Handle transaction status notifications',
       })
-      .catch(() => { });
+      .catch(() => {});
 
     const txsCache = (await getLocalValue(INSCRIPTION_TXS_CACHE)) ?? [];
 
@@ -423,7 +423,7 @@ async function onSignPsbt({ data = {}, sendResponse } = {}) {
       data.partial,
       data.sighashType
     );
-
+    console.log({ rawTx, fee, amount });
     sendResponse?.({
       rawTx,
       fee,
@@ -461,7 +461,7 @@ async function onSendPsbt({ data = {}, sendResponse } = {}) {
         reasons: ['BLOBS'],
         justification: 'Handle transaction status notifications',
       })
-      .catch(() => { });
+      .catch(() => {});
 
     await cacheSignedTx(data.rawTx);
 
@@ -591,6 +591,17 @@ async function onGetDogecoinPrice({ sendResponse } = {}) {
   }
 }
 
+async function onBroadcastTx({ data, sendResponse } = {}) {
+  try {
+    const response = (await dogeMempool.post('/tx', data)).data;
+
+    sendResponse?.(response);
+  } catch (err) {
+    logError(err);
+    sendResponse?.(false);
+  }
+}
+
 async function onGetAddressBalance({ data, sendResponse } = {}) {
   try {
     const addresses = data.addresses?.length ? data.addresses : [data.address];
@@ -615,8 +626,13 @@ async function onGetAddressBalance({ data, sendResponse } = {}) {
 async function onGetAddressUtxo({ data, sendResponse } = {}) {
   try {
     const { address, selectedAddressIndex } = data;
+    console.log(address);
     const response = await dogeMempool.get(`/address/${address}/utxo`);
-    const [encryptedWallet, password] = await Promise.all([getLocalValue(WALLET), getSessionValue(PASSWORD)]).
+    console.log(response);
+    const [encryptedWallet, password] = await Promise.all([
+      getLocalValue(WALLET),
+      getSessionValue(PASSWORD),
+    ]);
     const decryptedWallet = decrypt({
       data: encryptedWallet,
       password,
@@ -624,7 +640,6 @@ async function onGetAddressUtxo({ data, sendResponse } = {}) {
     const pubkey = fromWIF(
       decryptedWallet.children[selectedAddressIndex]
     ).publicKey.toString('hex');
-    console.log(response.data)
     sendResponse?.({ utxos: response.data, pubkey });
   } catch (err) {
     logError(err);
@@ -642,8 +657,9 @@ async function onGetTransactions({ data, sendResponse } = {}) {
     const response = (
       await mydoge.get('/wallet/info', {
         params: {
-          route: `/ address / ${data.address} ? page = ${data.page || 1
-            } & pageSize=${TRANSACTION_PAGE_SIZE}`,
+          route: `/ address / ${data.address} ? page = ${
+            data.page || 1
+          } & pageSize=${TRANSACTION_PAGE_SIZE}`,
         },
       })
     ).data;
@@ -1203,17 +1219,18 @@ async function onNotifyTransactionSuccess({ data: { txId } } = {}) {
             chrome.tabs.create({
               url: `https://sochain.com/tx/DOGE/${notificationId}`,
             });
-            await chrome.notifications.clear(notificationId).catch(() => { });
+            await chrome.notifications.clear(notificationId).catch(() => {});
           });
           chrome.notifications.create(txId, {
             type: 'basic',
             title: 'Transaction Confirmed',
             iconUrl: '../assets/mydoge128.png',
-            message: `${sb.toBitcoin(transaction.vout[0].value)} DOGE sent to ${transaction.vout[0].addresses[0]
-              }.`,
+            message: `${sb.toBitcoin(transaction.vout[0].value)} DOGE sent to ${
+              transaction.vout[0].addresses[0]
+            }.`,
           });
 
-          chrome.offscreen?.closeDocument().catch(() => { });
+          chrome.offscreen?.closeDocument().catch(() => {});
         } else if (!transaction) {
           chrome.notifications.create({
             type: 'basic',
@@ -1349,6 +1366,9 @@ export const messageHandler = ({ message, data }, sender, sendResponse) => {
       break;
     case MESSAGE_TYPES.GET_TRANSACTION_DETAILS:
       onGetTransactionDetails({ sender, sendResponse, data });
+      break;
+    case MESSAGE_TYPES.BROADCAST_TX:
+      onBroadcastTx({ sender, sendResponse, data });
       break;
     case MESSAGE_TYPES.UPDATE_ADDRESS_NICKNAME:
       onUpdateAddressNickname({ sender, sendResponse, data });
