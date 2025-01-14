@@ -144,7 +144,7 @@ export function ClientConnect({ params, wallet, handleResponse }) {
           <BigButton
             onPress={() => setConfirmationModalOpen(true)}
             px='20px'
-            isDisabled={!selectedAddressBalance}
+            // isDisabled={!selectedAddressBalance}
           >
             Connect
           </BigButton>
